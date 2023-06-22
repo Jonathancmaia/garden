@@ -19,7 +19,7 @@ const NavigationBar = () => {
     >
       <Container>
         <Navbar.Brand as={Link} to="/dashboard">
-          Garden
+          Dashboard
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">

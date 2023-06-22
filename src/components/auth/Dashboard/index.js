@@ -9,6 +9,7 @@ import NavigationBar from "../NavigationBar";
 import SideBar from "../SideBar";
 import Resume from "../authViews/Resume";
 import Profile from "../authViews/Profile";
+import AddItems from "../authViews/AddItems";
 import Items from "../authViews/Items";
 import Sales from "../authViews/Sales";
 
@@ -36,6 +37,7 @@ const Dashboard = () => {
           {/* Auth Routes */}
           <Routes>
             <Route path="profile" element={<Profile />} />
+            <Route path="additems" element={<AddItems />} />
             <Route path="items" element={<Items />} />
             <Route path="Sales" element={<Sales />} />
           </Routes>

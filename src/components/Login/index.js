@@ -15,12 +15,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    if (isLogged) {
-      navigate("/dashboard");
-    }
-  }, [isLogged]);
-
-  useEffect(() => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (regex.test(email)) {
       setEmail(true);
@@ -35,6 +29,12 @@ const Login = () => {
       setPassword(true);
     }
   }, [password]);
+
+  useEffect(() => {
+    if (isLogged) {
+      navigate("/dashboard");
+    }
+  }, [isLogged]);
 
   const handleLogin = async () => {
     setError(false);
