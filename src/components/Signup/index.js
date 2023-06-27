@@ -8,7 +8,7 @@ import Request from "../../config/request.js";
 const Signup = () => {
   const navigate = useNavigate();
 
-  const { setError, setSuccesses, isLogged } = useContext(Context);
+  const { setErrors, setSuccesses, isLogged } = useContext(Context);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,19 +49,23 @@ const Signup = () => {
   const handleSignup = async () => {
     setSuccesses(false);
 
-    await Axios.post(Request + "/signup", {
-      params: {
-        email: document.getElementById("formEmail").value,
-        password: document.getElementById("formPassword").value,
-      },
-    }).then((response) => {
-      if (response.data.errors) {
-        setError(response.data.errors);
-      } else if (response.data.successes) {
-        setSuccesses(response.data.successes);
-        navigate("/");
-      }
-    });
+    try {
+      await Axios.post(Request + "/signup", {
+        params: {
+          email: document.getElementById("formEmail").value,
+          password: document.getElementById("formPassword").value,
+        },
+      }).then((response) => {
+        if (response.data.errors) {
+          setErrors(response.data.errors);
+        } else if (response.data.successes) {
+          setSuccesses(response.data.successes);
+          navigate("/");
+        }
+      });
+    } catch (e) {
+      setErrors([{ message: e.message }]);
+    }
   };
 
   return (

@@ -10,7 +10,7 @@ import Signup from "./components/Signup";
 import "./App.css";
 
 function App() {
-  const { error, successes } = useContext(Context);
+  const { errors, successes } = useContext(Context);
 
   return (
     <Container fluid className="p-0">
@@ -26,12 +26,12 @@ function App() {
       ) : (
         <></>
       )}
-      {error ? (
+      {errors ? (
         <Alert className="col-md-5" variant={"danger"} dismissible>
           <Alert.Heading>
             <Fire /> Error!
           </Alert.Heading>
-          {error.map((err, i) => (
+          {errors.map((err, i) => (
             <p key={i}>{err.message}</p>
           ))}
         </Alert>

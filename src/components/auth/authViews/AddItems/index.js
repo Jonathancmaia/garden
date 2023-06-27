@@ -1,95 +1,96 @@
 import { useContext } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { useState, useEffect } from "react";
 import Context from "../../../../Context";
 import Axios from "axios";
 import Request from "../../../../config/request.js";
+import { useForm } from "react-hook-form";
 
 const AddItems = () => {
-  const { setError, setSuccesses } = useContext(Context);
-
-  const [name, setName] = useState("");
-  const [desc, setDesc] = useState("");
-  const [reais, setReais] = useState("");
-  const [cents, setCents] = useState("");
-
-  //Validate name
-  useEffect(() => {
-    if (name.length >= 2 && name.length <= 64) {
-      setName(true);
-    }
-  }, [name]);
-
-  //Validate desc
-  useEffect(() => {
-    if (desc.length <= 128 && desc !== "") {
-      setDesc(true);
-    }
-  }, [desc]);
-
-  //Validate reais
-  useEffect(() => {
-    if (reais >= 0 && reais <= 100000000 && reais !== "") {
-      setReais(true);
-    }
-  }, [reais]);
-
-  //Validate cents
-  useEffect(() => {
-    if (cents >= 0 && cents <= 99 && cents !== "") {
-      setCents(true);
-    }
-  }, [cents]);
+  const { setErrors, setSuccesses } = useContext(Context);
 
   const handleAddItem = async () => {
-    setError(false);
+    setErrors(false);
     setSuccesses(false);
     try {
-      await Axios.post(Request + "/items/add", {
+      await Axios.put(Request + "/items/add", {
         params: {
-          name: name,
-          desc: desc,
-          price: reais + cents.toString().padStart(2, "0"),
+          name: "",
+          desc: "",
+          price: "" /*reais + cents.toString().padStart(2, "0")*/,
         },
         headers: {
           token: localStorage.getItem("token"),
         },
       }).then((response) => {
         if (response.data.errors) {
-          setError(response.data.errors);
+          setErrors(response.data.errors);
         } else if (response.data.successes) {
           setSuccesses(response.data.successes);
         }
       });
     } catch (e) {
-      console.log(e);
+      setErrors([{ message: e.message }]);
     }
   };
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    isValid,
+    trigger,
+    watch,
+  } = useForm();
+
+  const values = watch();
 
   return (
     <Container fluid>
       <Row className="pt-4">
         <Col>
           <h3>Adicionar novo item</h3>
-          <Form>
-            <Form.Group className="mb-3" controlId="addItem">
+          <Form onSubmit={handleSubmit(handleAddItem)}>
+            <Form.Group className="mb-3">
               <Form.Label>Nome</Form.Label>
               <Form.Control
                 type="text"
+                name="name"
                 placeholder="Nome do seu produto"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
+                {...register("name", {
+                  required: true,
+                  minLength: 2,
+                  maxLength: 64,
+                })}
+                isInvalid={errors.name !== undefined ? true : false}
+                isValid={
+                  !errors.name !== "" &&
+                  values.name !== undefined &&
+                  values.name !== ""
+                    ? true
+                    : false
+                }
+                onKeyUp={() => {
+                  trigger("name");
                 }}
-                isValid={name === true ? true : false}
-                isInvalid={name !== true && name !== "" ? true : false}
               />
-              <Form.Control.Feedback type="invalid">
-                Por favor, insira um nome válido entre 2 e 64 carcateres.
-              </Form.Control.Feedback>
+              {errors.name && errors.name.type === "required" && (
+                <Form.Control.Feedback type="invalid">
+                  Por favor, insira um nome válido.
+                </Form.Control.Feedback>
+              )}
+              {errors.name && errors.name.type === "minLength" && (
+                <Form.Control.Feedback type="invalid">
+                  O nome deve ter no mínimo 2 caracteres.
+                </Form.Control.Feedback>
+              )}
+              {errors.name && errors.name.type === "maxLength" && (
+                <Form.Control.Feedback type="invalid">
+                  O nome deve ter no máximo 64 caracteres.
+                </Form.Control.Feedback>
+              )}
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="addItem">
+            <Form.Group className="mb-3">
               <Form.Label>
                 Descrição <small className="text-muted">(opcional)</small>
               </Form.Label>
@@ -97,70 +98,72 @@ const AddItems = () => {
                 as="textarea"
                 rows={2}
                 placeholder="Descrição do seu produto"
-                onKeyUp={(e) => {
-                  setDesc(e.target.value);
+                {...register("desc", {
+                  required: false,
+                  minLength: 0,
+                  maxLength: 128,
+                })}
+                isInvalid={errors.desc ? true : false}
+                isValid={
+                  !errors.desc &&
+                  errors.desc !== "" &&
+                  values.desc !== "" &&
+                  values.desc !== undefined
+                    ? true
+                    : false
+                }
+                onKeyUp={() => {
+                  trigger("desc");
                 }}
-                isValid={desc === true ? true : false}
-                isInvalid={desc !== true && desc !== "" ? true : false}
               />
-              <Form.Control.Feedback type="invalid">
-                Por favor, insira uma descrição com até 164 caracteres.
-              </Form.Control.Feedback>
+              {errors.desc && errors.desc.type === "maxLength" && (
+                <Form.Control.Feedback type="invalid">
+                  Insira uma descrição com até 128 caracteres.
+                </Form.Control.Feedback>
+              )}
             </Form.Group>
-            <Form.Group className="mb-3" controlId="addItem">
+
+            <Form.Group className="mb-3">
               <Form.Label>Preço (R$)</Form.Label>
               <Row>
-                <Col className="col-6">
+                <Col>
                   <Form.Control
+                    placeholder="0000"
                     type="number"
-                    placeholder="00"
+                    {...register("value", {
+                      required: true,
+                      min: 0,
+                      max: 10000000000,
+                      valueAsNumber: true,
+                    })}
+                    isInvalid={errors.value ? true : false}
+                    isValid={
+                      !errors.value || errors.value === undefined ? true : false
+                    }
                     onKeyUp={(e) => {
-                      setReais(e.target.value);
+                      trigger("value");
+                      console.log(errors.value);
                     }}
-                    isValid={reais === true ? true : false}
-                    isInvalid={reais !== true && reais !== "" ? true : false}
                   />
-                  <Form.Control.Feedback type="invalid">
-                    Por favor, insira um valor válido entre 0 e 100.000.000.
-                  </Form.Control.Feedback>
-                </Col>
-                <Col className="col-1 display-5">,</Col>
-                <Col className="col-5">
-                  <Form.Control
-                    type="number"
-                    placeholder="00"
-                    onKeyUp={(e) => {
-                      setCents(e.target.value);
-                    }}
-                    isValid={cents === true ? true : false}
-                    isInvalid={cents !== true && cents !== "" ? true : false}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    Por favor, insira um valor válido entre 0 e 99.
-                  </Form.Control.Feedback>
+                  {errors.value && errors.value.type === "required" && (
+                    <Form.Control.Feedback type="invalid">
+                      Por favor, insira um valor válido.
+                    </Form.Control.Feedback>
+                  )}
+                  {errors.value &&
+                    (errors.value.type === "min" ||
+                      errors.value.type === "max") && (
+                      <Form.Control.Feedback type="invalid">
+                        Por favor, insira um valor válido entre 0 e
+                        100.000.000,00.
+                      </Form.Control.Feedback>
+                    )}
                 </Col>
               </Row>
             </Form.Group>
-            <Form.Group className="mb-3" controlId="addItem">
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => {
-                  handleAddItem();
-                }}
-                disabled={
-                  (name === true &&
-                    desc === true &&
-                    reais === true &&
-                    cents === true) ||
-                  (name === true &&
-                    desc === "" &&
-                    reais === true &&
-                    cents === true)
-                    ? false
-                    : true
-                }
-              >
+
+            <Form.Group className="mb-3">
+              <Button variant="primary" size="lg" disabled={!isValid}>
                 Adicionar Item
               </Button>
             </Form.Group>

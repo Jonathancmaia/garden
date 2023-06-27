@@ -3,7 +3,7 @@ import React, { createContext, useState, useEffect } from "react";
 const Context = createContext();
 
 export const ContextProvider = ({ children }) => {
-  const [error, setError] = useState(false);
+  const [errors, setErrors] = useState(false);
   const [successes, setSuccesses] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
 
@@ -16,8 +16,8 @@ export const ContextProvider = ({ children }) => {
   return (
     <Context.Provider
       value={{
-        error,
-        setError,
+        errors,
+        setErrors,
         successes,
         setSuccesses,
         isLogged,

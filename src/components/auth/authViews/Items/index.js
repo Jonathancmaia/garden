@@ -6,12 +6,12 @@ import { Container, Row, Col, Button, Table, Spinner } from "react-bootstrap";
 import { useEffect, useState } from "react";
 
 const Items = () => {
-  const { setError, setSuccesses } = useContext(Context);
+  const { setErrors, setSuccesses } = useContext(Context);
   const [items, setItems] = useState(false);
 
   useEffect(() => {
     const handleItems = async () => {
-      setError(false);
+      setErrors(false);
       setSuccesses(false);
 
       try {
@@ -21,14 +21,14 @@ const Items = () => {
           },
         }).then((response) => {
           if (response.data.errors) {
-            setError(response.data.errors);
+            setErrors(response.data.errors);
           } else if (response.data.successes) {
             setSuccesses(response.data.successes);
             setItems(response.data.items);
           }
         });
       } catch (e) {
-        console.log(e);
+        setErrors([{ message: e.message }]);
       }
     };
 

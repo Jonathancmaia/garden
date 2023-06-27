@@ -9,7 +9,8 @@ import React, { useState, useEffect } from "react";
 const Login = () => {
   const navigate = useNavigate();
 
-  const { setError, setSuccesses, isLogged, setIsLogged } = useContext(Context);
+  const { setErrors, setSuccesses, isLogged, setIsLogged } =
+    useContext(Context);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,23 +38,27 @@ const Login = () => {
   }, [isLogged]);
 
   const handleLogin = async () => {
-    setError(false);
+    setErrors(false);
     setSuccesses(false);
 
-    await Axios.post(Request + "/login", {
-      params: {
-        email: document.getElementById("formEmail").value,
-        password: document.getElementById("formPassword").value,
-      },
-    }).then((response) => {
-      if (response.data.errors) {
-        setError(response.data.errors);
-      } else if (response.data.successes) {
-        setSuccesses(response.data.successes);
-        localStorage.setItem("token", response.data.token);
-        setIsLogged(true);
-      }
-    });
+    try {
+      await Axios.post(Request + "/login", {
+        params: {
+          email: document.getElementById("formEmail").value,
+          password: document.getElementById("formPassword").value,
+        },
+      }).then((response) => {
+        if (response.data.errors) {
+          setErrors(response.data.errors);
+        } else if (response.data.successes) {
+          setSuccesses(response.data.successes);
+          localStorage.setItem("token", response.data.token);
+          setIsLogged(true);
+        }
+      });
+    } catch (e) {
+      setErrors([{ message: e.message }]);
+    }
   };
 
   return (
