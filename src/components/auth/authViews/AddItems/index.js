@@ -11,12 +11,16 @@ const AddItems = () => {
   const handleAddItem = async () => {
     setErrors(false);
     setSuccesses(false);
+
     try {
       await Axios.put(Request + "/items/add", {
         params: {
-          name: "",
-          desc: "",
-          price: "" /*reais + cents.toString().padStart(2, "0")*/,
+          name: values.name,
+          desc: values.desc,
+          price: values.value.replace(
+            /\D/g,
+            ""
+          ) /* remove all caracters that ain't a number */,
         },
         headers: {
           token: localStorage.getItem("token"),
@@ -37,7 +41,6 @@ const AddItems = () => {
     register,
     handleSubmit,
     formState: { errors },
-    isValid,
     trigger,
     watch,
   } = useForm();
@@ -49,7 +52,8 @@ const AddItems = () => {
       <Row className="pt-4">
         <Col>
           <h3>Adicionar novo item</h3>
-          <Form onSubmit={handleSubmit(handleAddItem)}>
+
+          <Form noValidate onSubmit={handleSubmit(handleAddItem)}>
             <Form.Group className="mb-3">
               <Form.Label>Nome</Form.Label>
               <Form.Control
@@ -128,21 +132,37 @@ const AddItems = () => {
               <Row>
                 <Col>
                   <Form.Control
-                    placeholder="0000"
-                    type="number"
+                    type="text"
+                    defaultValue="R$ 00,00"
                     {...register("value", {
                       required: true,
-                      min: 0,
-                      max: 10000000000,
-                      valueAsNumber: true,
+                      minLengh: -1,
+                      maxLength: 11,
                     })}
                     isInvalid={errors.value ? true : false}
                     isValid={
-                      !errors.value || errors.value === undefined ? true : false
+                      !errors.value &&
+                      values.value !== undefined &&
+                      values.value !== ""
+                        ? true
+                        : false
                     }
                     onKeyUp={(e) => {
+                      //format value
+                      if (
+                        !isNaN(parseInt(e.target.value.replace(/[^\d.-]/g, "")))
+                      ) {
+                        e.target.value = new Intl.NumberFormat("pt-br", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(
+                          parseInt(e.target.value.replace(/[^\d.-]/g, "")) / 100
+                        );
+                      } else {
+                        e.target.value = "R$ 00,00";
+                      }
+
                       trigger("value");
-                      console.log(errors.value);
                     }}
                   />
                   {errors.value && errors.value.type === "required" && (
@@ -150,20 +170,22 @@ const AddItems = () => {
                       Por favor, insira um valor válido.
                     </Form.Control.Feedback>
                   )}
-                  {errors.value &&
-                    (errors.value.type === "min" ||
-                      errors.value.type === "max") && (
-                      <Form.Control.Feedback type="invalid">
-                        Por favor, insira um valor válido entre 0 e
-                        100.000.000,00.
-                      </Form.Control.Feedback>
-                    )}
+                  {errors.value && errors.value.type === "minLength" && (
+                    <Form.Control.Feedback type="invalid">
+                      Por favor, insira um valor maior que 0.
+                    </Form.Control.Feedback>
+                  )}
+                  {errors.value && errors.value.type === "maxLength" && (
+                    <Form.Control.Feedback type="invalid">
+                      Por favor, insira um valor maior que 9.999,99.
+                    </Form.Control.Feedback>
+                  )}
                 </Col>
               </Row>
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Button variant="primary" size="lg" disabled={!isValid}>
+              <Button type="submit" variant="primary" size="lg">
                 Adicionar Item
               </Button>
             </Form.Group>
