@@ -1,50 +1,32 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import Context from "../../Context";
 import Axios from "axios";
 import { Form, Row, Col, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Request from "../../config/request.js";
+import { useForm } from "react-hook-form";
 
 const Signup = () => {
   const navigate = useNavigate();
 
   const { setErrors, setSuccesses, isLogged } = useContext(Context);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confPassword, setConfPassword] = useState("");
-
+  //Send usar to dashboard if its logged
   useEffect(() => {
     if (isLogged) {
       navigate("/dashboard");
     }
   }, [isLogged]);
 
-  useEffect(() => {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (regex.test(email)) {
-      setEmail(true);
-    }
-  }, [email]);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    trigger,
+    watch,
+  } = useForm();
 
-  useEffect(() => {
-    if (
-      document.getElementById("formPassword").value.length >= 6 &&
-      document.getElementById("formPassword").value.length <= 32
-    ) {
-      setPassword(true);
-    }
-  }, [password]);
-
-  useEffect(() => {
-    if (
-      document.getElementById("formConfPassword").value ===
-        document.getElementById("formPassword").value &&
-      password
-    ) {
-      setConfPassword(true);
-    }
-  }, [confPassword, password]);
+  const values = watch();
 
   const handleSignup = async () => {
     setSuccesses(false);
@@ -52,8 +34,8 @@ const Signup = () => {
     try {
       await Axios.post(Request + "/signup", {
         params: {
-          email: document.getElementById("formEmail").value,
-          password: document.getElementById("formPassword").value,
+          email: values.email,
+          password: values.password,
         },
       }).then((response) => {
         if (response.data.errors) {
@@ -69,26 +51,49 @@ const Signup = () => {
   };
 
   return (
-    <Form className="col-md-5 mx-auto">
+    <Form className="col-md-5 mx-auto" onSubmit={handleSubmit(handleSignup)}>
       <h1 className="m-5 text-center">Dashboards</h1>
+
       <Form.Group as={Row} className="mb-3" controlId="formEmail">
         <Form.Label column sm="4">
           E-mail
         </Form.Label>
         <Col sm="8">
           <Form.Control
-            placeholder="email@example.com"
-            onKeyUp={(e) => {
-              setEmail(e.target.value);
+            type="text"
+            name="email"
+            placeholder="example@gmail.com"
+            {...register("email", {
+              required: true,
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              },
+            })}
+            isInvalid={errors.email !== undefined ? true : false}
+            isValid={
+              !errors.email !== "" &&
+              values.email !== undefined &&
+              values.email !== ""
+                ? true
+                : false
+            }
+            onKeyUp={() => {
+              trigger("email");
             }}
-            isValid={email === true ? true : false}
-            isInvalid={email !== true && email !== "" ? true : false}
           />
-          <Form.Control.Feedback type="invalid">
-            Por favor, insira um e-mail válido.
-          </Form.Control.Feedback>
+          {errors.email && errors.email.type === "pattern" && (
+            <Form.Control.Feedback type="invalid">
+              Por favor, insira um email válido.
+            </Form.Control.Feedback>
+          )}
+          {errors.email && errors.email.type === "required" && (
+            <Form.Control.Feedback type="invalid">
+              Por favor, insira um email.
+            </Form.Control.Feedback>
+          )}
         </Col>
       </Form.Group>
+
       <Form.Group as={Row} className="mb-3" controlId="formPassword">
         <Form.Label column sm="4">
           Senha
@@ -96,18 +101,43 @@ const Signup = () => {
         <Col sm="8">
           <Form.Control
             type="password"
+            name="password"
             placeholder="Senha"
-            onKeyUp={(e) => {
-              setPassword(e.target.value);
+            {...register("password", {
+              required: true,
+              minLength: 8,
+              maxLength: 32,
+            })}
+            isInvalid={errors.password !== undefined ? true : false}
+            isValid={
+              !errors.password !== "" &&
+              values.password !== undefined &&
+              values.password !== ""
+                ? true
+                : false
+            }
+            onKeyUp={() => {
+              trigger("password");
             }}
-            isValid={password === true ? true : false}
-            isInvalid={password !== true && password !== "" ? true : false}
           />
-          <Form.Control.Feedback type="invalid">
-            Por favor, insira uma senha entre 6 e 32 dígitos.
-          </Form.Control.Feedback>
+          {errors.password && errors.password.type === "minLength" && (
+            <Form.Control.Feedback type="invalid">
+              Por favor, insira uma senha que possua 8 caracteres ou mais.
+            </Form.Control.Feedback>
+          )}
+          {errors.password && errors.password.type === "maxLength" && (
+            <Form.Control.Feedback type="invalid">
+              Por favor, insira uma senha que possua 32 caracteres ou menos.
+            </Form.Control.Feedback>
+          )}
+          {errors.password && errors.password.type === "required" && (
+            <Form.Control.Feedback type="invalid">
+              Por favor, insira sua senha.
+            </Form.Control.Feedback>
+          )}
         </Col>
       </Form.Group>
+
       <Form.Group as={Row} className="mb-3" controlId="formConfPassword">
         <Form.Label column sm="4">
           Cofirme sua senha
@@ -115,36 +145,44 @@ const Signup = () => {
         <Col sm="8">
           <Form.Control
             type="password"
-            placeholder="Digite sua senha"
-            onKeyUp={(e) => {
-              setConfPassword(e.target.value);
-            }}
-            isValid={confPassword === true ? true : false}
-            isInvalid={
-              confPassword !== true && confPassword !== "" ? true : false
+            name="passwordConf"
+            placeholder="Digite sua senha novamente"
+            {...register("passwordConf", {
+              required: true,
+              validate: (value) => value === values.password,
+            })}
+            isInvalid={errors.passwordConf !== undefined ? true : false}
+            isValid={
+              !errors.passwordConf !== "" &&
+              values.passwordConf !== undefined &&
+              values.passwordConf !== ""
+                ? true
+                : false
             }
+            onKeyUp={() => {
+              trigger("passwordConf");
+              console.log(errors.passwordConf);
+            }}
           />
-          <Form.Control.Feedback type="invalid">
-            Por favor, insira a senha novamente.
-          </Form.Control.Feedback>
+          {errors.passwordConf && errors.passwordConf.type === "required" && (
+            <Form.Control.Feedback type="invalid">
+              Por favor, insira sua senha novamente.
+            </Form.Control.Feedback>
+          )}
+          {errors.passwordConf && errors.passwordConf.type === "validate" && (
+            <Form.Control.Feedback type="invalid">
+              As senhas não coincidem.
+            </Form.Control.Feedback>
+          )}
         </Col>
       </Form.Group>
-      <Form.Group as={Row} className="mt-5" controlId="formSubmit">
-        <Button
-          variant="primary"
-          size="lg"
-          onClick={() => {
-            handleSignup();
-          }}
-          disabled={
-            email === true && password === true && confPassword === true
-              ? false
-              : true
-          }
-        >
+
+      <Form.Group as={Row} className="mt-5">
+        <Button variant="primary" size="lg" type="submit">
           Cadastre-se
         </Button>
       </Form.Group>
+
       <Form.Group>
         <Form.Text className="d-flex justify-content-center m-2" muted>
           Já possui uma conta? <Link to="/">Faça o Login</Link>
