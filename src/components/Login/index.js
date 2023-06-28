@@ -4,8 +4,9 @@ import Axios from "axios";
 import Context from "../../Context";
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Eye, EyeSlash } from "react-bootstrap-icons";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -53,6 +54,9 @@ const Login = () => {
       setErrors([{ message: e.message }]);
     }
   };
+
+  //Snippet that hide or show password
+  const [show, setShow] = useState(false);
 
   return (
     <Form
@@ -102,11 +106,26 @@ const Login = () => {
 
       <Form.Group as={Row} className="mb-3">
         <Form.Label column sm="4">
-          Password
+          Senha
+          {show ? (
+            <EyeSlash
+              className="show-hide-password"
+              onClick={() => {
+                setShow(false);
+              }}
+            />
+          ) : (
+            <Eye
+              className="show-hide-password"
+              onClick={() => {
+                setShow(true);
+              }}
+            />
+          )}
         </Form.Label>
         <Col sm="8">
           <Form.Control
-            type="password"
+            type={show ? "text" : "password"}
             name="password"
             placeholder="Senha"
             {...register("password", {

@@ -1,10 +1,11 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Context from "../../Context";
 import Axios from "axios";
 import { Form, Row, Col, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import Request from "../../config/request.js";
 import { useForm } from "react-hook-form";
+import { Eye, EyeSlash } from "react-bootstrap-icons";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -49,6 +50,9 @@ const Signup = () => {
       setErrors([{ message: e.message }]);
     }
   };
+
+  //Snippet that hide or show password
+  const [show, setShow] = useState(false);
 
   return (
     <Form className="col-md-5 mx-auto" onSubmit={handleSubmit(handleSignup)}>
@@ -97,10 +101,25 @@ const Signup = () => {
       <Form.Group as={Row} className="mb-3" controlId="formPassword">
         <Form.Label column sm="4">
           Senha
+          {show ? (
+            <EyeSlash
+              className="show-hide-password"
+              onClick={() => {
+                setShow(false);
+              }}
+            />
+          ) : (
+            <Eye
+              className="show-hide-password"
+              onClick={() => {
+                setShow(true);
+              }}
+            />
+          )}
         </Form.Label>
         <Col sm="8">
           <Form.Control
-            type="password"
+            type={show ? "text" : "password"}
             name="password"
             placeholder="Senha"
             {...register("password", {
@@ -144,7 +163,7 @@ const Signup = () => {
         </Form.Label>
         <Col sm="8">
           <Form.Control
-            type="password"
+            type={show ? "text" : "password"}
             name="passwordConf"
             placeholder="Digite sua senha novamente"
             {...register("passwordConf", {
