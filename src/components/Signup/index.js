@@ -10,7 +10,31 @@ import { Eye, EyeSlash } from "react-bootstrap-icons";
 const Signup = () => {
   const navigate = useNavigate();
 
-  const { setErrors, setSuccesses, isLogged } = useContext(Context);
+  const { setErrors, errors, setSuccesses, successes, isLogged } =
+    useContext(Context);
+
+  const handleSignup = async () => {
+    try {
+      await Axios.post(Request + "/signup", {
+        params: {
+          email: values.email,
+          password: values.password,
+        },
+      }).then((response) => {
+        if (response.data.errors) {
+          setErrors([...errors, response.data.errors[0]]);
+        } else if (response.data.successes) {
+          setSuccesses([...successes, response.data.successes[0]]);
+          navigate("/");
+        }
+      });
+    } catch (e) {
+      setErrors([...errors, { message: e.message }]);
+    }
+  };
+
+  //Snippet that hide or show password
+  const [show, setShow] = useState(false);
 
   //Send usar to dashboard if its logged
   useEffect(() => {
@@ -22,37 +46,12 @@ const Signup = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors: errorsForm },
     trigger,
     watch,
   } = useForm();
 
   const values = watch();
-
-  const handleSignup = async () => {
-    setSuccesses(false);
-
-    try {
-      await Axios.post(Request + "/signup", {
-        params: {
-          email: values.email,
-          password: values.password,
-        },
-      }).then((response) => {
-        if (response.data.errors) {
-          setErrors(response.data.errors);
-        } else if (response.data.successes) {
-          setSuccesses(response.data.successes);
-          navigate("/");
-        }
-      });
-    } catch (e) {
-      setErrors([{ message: e.message }]);
-    }
-  };
-
-  //Snippet that hide or show password
-  const [show, setShow] = useState(false);
 
   return (
     <Form className="col-md-5 mx-auto" onSubmit={handleSubmit(handleSignup)}>
@@ -73,9 +72,9 @@ const Signup = () => {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
               },
             })}
-            isInvalid={errors.email !== undefined ? true : false}
+            isInvalid={errorsForm.email !== undefined ? true : false}
             isValid={
-              !errors.email !== "" &&
+              !errorsForm.email !== "" &&
               values.email !== undefined &&
               values.email !== ""
                 ? true
@@ -85,12 +84,12 @@ const Signup = () => {
               trigger("email");
             }}
           />
-          {errors.email && errors.email.type === "pattern" && (
+          {errorsForm.email && errorsForm.email.type === "pattern" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira um email válido.
             </Form.Control.Feedback>
           )}
-          {errors.email && errors.email.type === "required" && (
+          {errorsForm.email && errorsForm.email.type === "required" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira um email.
             </Form.Control.Feedback>
@@ -103,14 +102,14 @@ const Signup = () => {
           Senha
           {show ? (
             <EyeSlash
-              className="show-hide-password"
+              className="show-hide-password mx-2"
               onClick={() => {
                 setShow(false);
               }}
             />
           ) : (
             <Eye
-              className="show-hide-password"
+              className="show-hide-password mx-2"
               onClick={() => {
                 setShow(true);
               }}
@@ -127,9 +126,9 @@ const Signup = () => {
               minLength: 8,
               maxLength: 32,
             })}
-            isInvalid={errors.password !== undefined ? true : false}
+            isInvalid={errorsForm.password !== undefined ? true : false}
             isValid={
-              !errors.password !== "" &&
+              !errorsForm.password !== "" &&
               values.password !== undefined &&
               values.password !== ""
                 ? true
@@ -139,17 +138,17 @@ const Signup = () => {
               trigger("password");
             }}
           />
-          {errors.password && errors.password.type === "minLength" && (
+          {errorsForm.password && errorsForm.password.type === "minLength" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira uma senha que possua 8 caracteres ou mais.
             </Form.Control.Feedback>
           )}
-          {errors.password && errors.password.type === "maxLength" && (
+          {errorsForm.password && errorsForm.password.type === "maxLength" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira uma senha que possua 32 caracteres ou menos.
             </Form.Control.Feedback>
           )}
-          {errors.password && errors.password.type === "required" && (
+          {errorsForm.password && errorsForm.password.type === "required" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira sua senha.
             </Form.Control.Feedback>
@@ -170,9 +169,9 @@ const Signup = () => {
               required: true,
               validate: (value) => value === values.password,
             })}
-            isInvalid={errors.passwordConf !== undefined ? true : false}
+            isInvalid={errorsForm.passwordConf !== undefined ? true : false}
             isValid={
-              !errors.passwordConf !== "" &&
+              !errorsForm.passwordConf !== "" &&
               values.passwordConf !== undefined &&
               values.passwordConf !== ""
                 ? true
@@ -180,19 +179,20 @@ const Signup = () => {
             }
             onKeyUp={() => {
               trigger("passwordConf");
-              console.log(errors.passwordConf);
             }}
           />
-          {errors.passwordConf && errors.passwordConf.type === "required" && (
-            <Form.Control.Feedback type="invalid">
-              Por favor, insira sua senha novamente.
-            </Form.Control.Feedback>
-          )}
-          {errors.passwordConf && errors.passwordConf.type === "validate" && (
-            <Form.Control.Feedback type="invalid">
-              As senhas não coincidem.
-            </Form.Control.Feedback>
-          )}
+          {errorsForm.passwordConf &&
+            errorsForm.passwordConf.type === "required" && (
+              <Form.Control.Feedback type="invalid">
+                Por favor, insira sua senha novamente.
+              </Form.Control.Feedback>
+            )}
+          {errorsForm.passwordConf &&
+            errorsForm.passwordConf.type === "validate" && (
+              <Form.Control.Feedback type="invalid">
+                As senhas não coincidem.
+              </Form.Control.Feedback>
+            )}
         </Col>
       </Form.Group>
 

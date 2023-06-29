@@ -4,36 +4,55 @@ import Request from "../../../../config/request.js";
 import { useContext } from "react";
 import { Container, Row, Col, Button, Table, Spinner } from "react-bootstrap";
 import { useEffect, useState } from "react";
+import { Trash, Gear } from "react-bootstrap-icons";
 
 const Items = () => {
-  const { setErrors, setSuccesses } = useContext(Context);
+  const { setErrors, errors, setSuccesses, successes } = useContext(Context);
   const [items, setItems] = useState(false);
 
+  //Get all items
+  const handleItems = async () => {
+    try {
+      await Axios.get(Request + "/items", {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      }).then((response) => {
+        if (response.data.errors) {
+          setErrors([...errors, response.data.errors[0]]);
+        } else if (response.data.successes) {
+          setSuccesses([...successes, response.data.successes[0]]);
+          setItems(response.data.items);
+        }
+      });
+    } catch (e) {
+      setErrors([...errors, { message: e.message }]);
+    }
+  };
+
+  //Delete item
+  const deleteItem = async (item) => {
+    try {
+      await Axios.delete(Request + "/items/delete/" + item, {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      }).then((response) => {
+        if (response.data.errors) {
+          setErrors([...errors, response.data.errors[0]]);
+        } else if (response.data.successes) {
+          setSuccesses([...successes, response.data.successes[0]]);
+        }
+      });
+    } catch (e) {
+      setErrors([...errors, { message: e.message }]);
+    }
+  };
+
   useEffect(() => {
-    const handleItems = async () => {
-      setErrors(false);
-      setSuccesses(false);
-
-      try {
-        await Axios.get(Request + "/items", {
-          headers: {
-            token: localStorage.getItem("token"),
-          },
-        }).then((response) => {
-          if (response.data.errors) {
-            setErrors(response.data.errors);
-          } else if (response.data.successes) {
-            setSuccesses(response.data.successes);
-            setItems(response.data.items);
-          }
-        });
-      } catch (e) {
-        setErrors([{ message: e.message }]);
-      }
-    };
-
     handleItems();
   }, []);
+
   return (
     <Container fluid>
       <Row className="pt-4">
@@ -51,6 +70,7 @@ const Items = () => {
                   <th>Nome</th>
                   <th>Descrição</th>
                   <th>Valor</th>
+                  <th colSpan={2}>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -60,6 +80,17 @@ const Items = () => {
                     <td>{item.name}</td>
                     <td>{item.desc}</td>
                     <td>{item.value}</td>
+                    <td>
+                      <Gear className="icons" />
+                    </td>
+                    <td>
+                      <Trash
+                        className="icons"
+                        onClick={() => {
+                          deleteItem(item.id);
+                        }}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>

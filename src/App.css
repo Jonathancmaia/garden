@@ -5,14 +5,20 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+}
+
+.alert-handler {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%);
+  z-index: 99;
+  padding-top: 2rem;
 }
 
 div[role="alert"] {
-  position: absolute;
-  left: 50%;
-  top: 2rem;
-  transform: translate(-50%);
-  z-index: 99;
+  position: relative;
+  width: 100%;
 }
 
 input[type="number"]::-webkit-inner-spin-button {
@@ -20,11 +26,26 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
 
-.show-hide-password {
+.show-hide-password,
+.icons {
   cursor: pointer;
   font-size: 150%;
-  margin-left: 1vw;
   margin-top: -0.25rem;
+}
+
+.loading-bar {
+  height: 0.25rem;
+  background-color: rgb(0, 0, 0, 0.5);
+  animation: loading 5s ease-in-out;
+}
+
+@keyframes loading {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 /* http://meyerweb.com/eric/tools/css/reset/ 

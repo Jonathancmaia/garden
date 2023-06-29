@@ -11,7 +11,7 @@ import { Eye, EyeSlash } from "react-bootstrap-icons";
 const Login = () => {
   const navigate = useNavigate();
 
-  const { setErrors, setSuccesses, isLogged, setIsLogged } =
+  const { setErrors, errors, setSuccesses, successes, isLogged, setIsLogged } =
     useContext(Context);
 
   //Send user to dashboard if its logged
@@ -24,7 +24,7 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors: errorsForm },
     trigger,
     watch,
   } = useForm();
@@ -32,9 +32,6 @@ const Login = () => {
   const values = watch();
 
   const handleLogin = async () => {
-    setErrors(false);
-    setSuccesses(false);
-
     try {
       await Axios.post(Request + "/login", {
         params: {
@@ -43,15 +40,15 @@ const Login = () => {
         },
       }).then((response) => {
         if (response.data.errors) {
-          setErrors(response.data.errors);
+          setErrors([...errors, response.data.errors[0]]);
         } else if (response.data.successes) {
-          setSuccesses(response.data.successes);
+          setSuccesses([...successes, response.data.successes[0]]);
           localStorage.setItem("token", response.data.token);
           setIsLogged(true);
         }
       });
     } catch (e) {
-      setErrors([{ message: e.message }]);
+      setErrors([...errors, { message: e.message }]);
     }
   };
 
@@ -79,9 +76,9 @@ const Login = () => {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
               },
             })}
-            isInvalid={errors.email !== undefined ? true : false}
+            isInvalid={errorsForm.email !== undefined ? true : false}
             isValid={
-              !errors.email !== "" &&
+              !errorsForm.email !== "" &&
               values.email !== undefined &&
               values.email !== ""
                 ? true
@@ -91,12 +88,12 @@ const Login = () => {
               trigger("email");
             }}
           />
-          {errors.email && errors.email.type === "pattern" && (
+          {errorsForm.email && errorsForm.email.type === "pattern" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira um email válido.
             </Form.Control.Feedback>
           )}
-          {errors.email && errors.email.type === "required" && (
+          {errorsForm.email && errorsForm.email.type === "required" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira um email.
             </Form.Control.Feedback>
@@ -109,14 +106,14 @@ const Login = () => {
           Senha
           {show ? (
             <EyeSlash
-              className="show-hide-password"
+              className="show-hide-password mx-2"
               onClick={() => {
                 setShow(false);
               }}
             />
           ) : (
             <Eye
-              className="show-hide-password"
+              className="show-hide-password mx-2"
               onClick={() => {
                 setShow(true);
               }}
@@ -133,9 +130,9 @@ const Login = () => {
               minLength: 8,
               maxLength: 32,
             })}
-            isInvalid={errors.password !== undefined ? true : false}
+            isInvalid={errorsForm.password !== undefined ? true : false}
             isValid={
-              !errors.password !== "" &&
+              !errorsForm.password !== "" &&
               values.password !== undefined &&
               values.password !== ""
                 ? true
@@ -145,17 +142,17 @@ const Login = () => {
               trigger("password");
             }}
           />
-          {errors.password && errors.password.type === "minLength" && (
+          {errorsForm.password && errorsForm.password.type === "minLength" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira sua senha, que possui 8 caracteres ou mais.
             </Form.Control.Feedback>
           )}
-          {errors.password && errors.password.type === "maxLength" && (
+          {errorsForm.password && errorsForm.password.type === "maxLength" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira sua senha, que possui 32 caracteres ou menos.
             </Form.Control.Feedback>
           )}
-          {errors.password && errors.password.type === "required" && (
+          {errorsForm.password && errorsForm.password.type === "required" && (
             <Form.Control.Feedback type="invalid">
               Por favor, insira sua senha.
             </Form.Control.Feedback>

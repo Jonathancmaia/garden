@@ -6,12 +6,9 @@ import Request from "../../../../config/request.js";
 import { useForm } from "react-hook-form";
 
 const AddItems = () => {
-  const { setErrors, setSuccesses } = useContext(Context);
+  const { setErrors, errors, setSuccesses, successes } = useContext(Context);
 
   const handleAddItem = async () => {
-    setErrors(false);
-    setSuccesses(false);
-
     try {
       await Axios.put(Request + "/items/add", {
         params: {
@@ -27,20 +24,20 @@ const AddItems = () => {
         },
       }).then((response) => {
         if (response.data.errors) {
-          setErrors(response.data.errors);
+          setErrors([...errors, response.data.errors[0]]);
         } else if (response.data.successes) {
-          setSuccesses(response.data.successes);
+          setSuccesses([...successes, response.data.successes[0]]);
         }
       });
     } catch (e) {
-      setErrors([{ message: e.message }]);
+      setErrors([...errors, { message: e.message }]);
     }
   };
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors: errorsForm },
     trigger,
     watch,
   } = useForm();
@@ -65,9 +62,9 @@ const AddItems = () => {
                   minLength: 2,
                   maxLength: 64,
                 })}
-                isInvalid={errors.name !== undefined ? true : false}
+                isInvalid={errorsForm.name !== undefined ? true : false}
                 isValid={
-                  !errors.name !== "" &&
+                  !errorsForm.name !== "" &&
                   values.name !== undefined &&
                   values.name !== ""
                     ? true
@@ -77,17 +74,17 @@ const AddItems = () => {
                   trigger("name");
                 }}
               />
-              {errors.name && errors.name.type === "required" && (
+              {errorsForm.name && errorsForm.name.type === "required" && (
                 <Form.Control.Feedback type="invalid">
                   Por favor, insira um nome válido.
                 </Form.Control.Feedback>
               )}
-              {errors.name && errors.name.type === "minLength" && (
+              {errorsForm.name && errorsForm.name.type === "minLength" && (
                 <Form.Control.Feedback type="invalid">
                   O nome deve ter no mínimo 2 caracteres.
                 </Form.Control.Feedback>
               )}
-              {errors.name && errors.name.type === "maxLength" && (
+              {errorsForm.name && errorsForm.name.type === "maxLength" && (
                 <Form.Control.Feedback type="invalid">
                   O nome deve ter no máximo 64 caracteres.
                 </Form.Control.Feedback>
@@ -107,10 +104,10 @@ const AddItems = () => {
                   minLength: 0,
                   maxLength: 128,
                 })}
-                isInvalid={errors.desc ? true : false}
+                isInvalid={errorsForm.desc ? true : false}
                 isValid={
-                  !errors.desc &&
-                  errors.desc !== "" &&
+                  !errorsForm.desc &&
+                  errorsForm.desc !== "" &&
                   values.desc !== "" &&
                   values.desc !== undefined
                     ? true
@@ -120,7 +117,7 @@ const AddItems = () => {
                   trigger("desc");
                 }}
               />
-              {errors.desc && errors.desc.type === "maxLength" && (
+              {errorsForm.desc && errorsForm.desc.type === "maxLength" && (
                 <Form.Control.Feedback type="invalid">
                   Insira uma descrição com até 128 caracteres.
                 </Form.Control.Feedback>
@@ -139,9 +136,9 @@ const AddItems = () => {
                       minLengh: -1,
                       maxLength: 11,
                     })}
-                    isInvalid={errors.value ? true : false}
+                    isInvalid={errorsForm.value ? true : false}
                     isValid={
-                      !errors.value &&
+                      !errorsForm.value &&
                       values.value !== undefined &&
                       values.value !== ""
                         ? true
@@ -165,21 +162,23 @@ const AddItems = () => {
                       trigger("value");
                     }}
                   />
-                  {errors.value && errors.value.type === "required" && (
+                  {errorsForm.value && errorsForm.value.type === "required" && (
                     <Form.Control.Feedback type="invalid">
                       Por favor, insira um valor válido.
                     </Form.Control.Feedback>
                   )}
-                  {errors.value && errors.value.type === "minLength" && (
-                    <Form.Control.Feedback type="invalid">
-                      Por favor, insira um valor maior que 0.
-                    </Form.Control.Feedback>
-                  )}
-                  {errors.value && errors.value.type === "maxLength" && (
-                    <Form.Control.Feedback type="invalid">
-                      Por favor, insira um valor maior que 9.999,99.
-                    </Form.Control.Feedback>
-                  )}
+                  {errorsForm.value &&
+                    errorsForm.value.type === "minLength" && (
+                      <Form.Control.Feedback type="invalid">
+                        Por favor, insira um valor maior que 0.
+                      </Form.Control.Feedback>
+                    )}
+                  {errorsForm.value &&
+                    errorsForm.value.type === "maxLength" && (
+                      <Form.Control.Feedback type="invalid">
+                        Por favor, insira um valor maior que 9.999,99.
+                      </Form.Control.Feedback>
+                    )}
                 </Col>
               </Row>
             </Form.Group>

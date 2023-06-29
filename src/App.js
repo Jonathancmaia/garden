@@ -14,31 +14,34 @@ function App() {
 
   return (
     <Container fluid className="p-0">
-      {successes ? (
-        <Alert className="col-md-5" variant={"success"} dismissible>
-          <Alert.Heading>
-            <CheckAll /> Success!
-          </Alert.Heading>
-          {successes.map((suc, i) => (
-            <p key={i}>{suc.message}</p>
-          ))}
-        </Alert>
-      ) : (
-        <></>
-      )}
-      {errors ? (
-        <Alert className="col-md-5" variant={"danger"} dismissible>
-          <Alert.Heading>
-            <Fire /> Error!
-          </Alert.Heading>
-          {errors.map((err, i) => (
-            <p key={i}>{err.message}</p>
-          ))}
-        </Alert>
-      ) : (
-        <></>
-      )}
-
+      <div className="alert-handler">
+        {successes.length > 0 ? (
+          successes.map((suc, i) => (
+            <Alert className="col-md-5" variant={"success"} key={i}>
+              <Alert.Heading>
+                <CheckAll /> Success!
+              </Alert.Heading>
+              <div className="loading-bar"></div>
+              <p>{suc.message}</p>
+            </Alert>
+          ))
+        ) : (
+          <></>
+        )}
+        {errors.length > 0 ? (
+          errors.map((err, i) => (
+            <Alert className="col-md-5" variant={"danger"} key={i} dismissible>
+              <Alert.Heading>
+                <Fire /> Error!
+              </Alert.Heading>
+              <div className="loading-bar"></div>
+              <p>{err.message}</p>
+            </Alert>
+          ))
+        ) : (
+          <></>
+        )}
+      </div>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

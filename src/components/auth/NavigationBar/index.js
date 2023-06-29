@@ -5,11 +5,21 @@ import { BoxArrowRight } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 
 const NavigationBar = () => {
-  const { setIsLogged } = useContext(Context);
+  const { setErrors, errors, setSuccesses, successes, setIsLogged, isLogged } =
+    useContext(Context);
 
   const logoutHandler = () => {
     setIsLogged(false);
     localStorage.removeItem("token");
+
+    if (isLogged && localStorage.getItem("token")) {
+      setErrors([
+        ...errors,
+        { message: "Não foi possível realizar o logout." },
+      ]);
+    } else {
+      setSuccesses([...successes, { message: "Logout feito com sucesso." }]);
+    }
   };
 
   return (
