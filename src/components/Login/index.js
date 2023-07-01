@@ -1,6 +1,4 @@
 import { Form, Button, Row, Col } from "react-bootstrap";
-import Request from "../../config/request.js";
-import Axios from "axios";
 import Context from "../../Context";
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -11,7 +9,7 @@ import { Eye, EyeSlash } from "react-bootstrap-icons";
 const Login = () => {
   const navigate = useNavigate();
 
-  const { setErrors, errors, setSuccesses, successes, isLogged, setIsLogged } =
+  const { isLogged, setIsLogged, Request } =
     useContext(Context);
 
   //Send user to dashboard if its logged
@@ -31,25 +29,16 @@ const Login = () => {
 
   const values = watch();
 
-  const handleLogin = async () => {
-    try {
-      await Axios.post(Request + "/login", {
-        params: {
-          email: values.email,
-          password: values.password,
-        },
-      }).then((response) => {
-        if (response.data.errors) {
-          setErrors([...errors, response.data.errors[0]]);
-        } else if (response.data.successes) {
-          setSuccesses([...successes, response.data.successes[0]]);
-          localStorage.setItem("token", response.data.token);
-          setIsLogged(true);
-        }
-      });
-    } catch (e) {
-      setErrors([...errors, { message: e.message }]);
-    }
+  const handleLogin = () => {
+    Request("post", "/login", {
+      email: values.email,
+      password: values.password,
+    }, false).then((data)=>{
+      if(data){
+        localStorage.setItem("token", data.token);
+        setIsLogged(true);
+      }
+    });
   };
 
   //Snippet that hide or show password

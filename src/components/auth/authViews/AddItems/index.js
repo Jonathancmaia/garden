@@ -1,37 +1,17 @@
 import { useContext } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import Context from "../../../../Context";
-import Axios from "axios";
-import Request from "../../../../config/request.js";
 import { useForm } from "react-hook-form";
 
 const AddItems = () => {
-  const { setErrors, errors, setSuccesses, successes } = useContext(Context);
+  const { Request } = useContext(Context);
 
   const handleAddItem = async () => {
-    try {
-      await Axios.put(Request + "/items/add", {
-        params: {
-          name: values.name,
-          desc: values.desc,
-          price: values.value.replace(
-            /\D/g,
-            ""
-          ) /* remove all caracters that ain't a number */,
-        },
-        headers: {
-          token: localStorage.getItem("token"),
-        },
-      }).then((response) => {
-        if (response.data.errors) {
-          setErrors([...errors, response.data.errors[0]]);
-        } else if (response.data.successes) {
-          setSuccesses([...successes, response.data.successes[0]]);
-        }
-      });
-    } catch (e) {
-      setErrors([...errors, { message: e.message }]);
-    }
+    Request("put", "/items/add", {
+      name: values.name,
+      desc: values.desc,
+      price: values.value.replace( /\D/g,"")
+    }, true);
   };
 
   const {

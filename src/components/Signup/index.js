@@ -10,27 +10,17 @@ import { Eye, EyeSlash } from "react-bootstrap-icons";
 const Signup = () => {
   const navigate = useNavigate();
 
-  const { setErrors, errors, setSuccesses, successes, isLogged } =
-    useContext(Context);
+  const {isLogged, Request} = useContext(Context);
 
-  const handleSignup = async () => {
-    try {
-      await Axios.post(Request + "/signup", {
-        params: {
-          email: values.email,
-          password: values.password,
-        },
-      }).then((response) => {
-        if (response.data.errors) {
-          setErrors([...errors, response.data.errors[0]]);
-        } else if (response.data.successes) {
-          setSuccesses([...successes, response.data.successes[0]]);
-          navigate("/");
-        }
-      });
-    } catch (e) {
-      setErrors([...errors, { message: e.message }]);
-    }
+  const handleSignup = () => {
+    Request("post", "/signup", {
+      email: values.email,
+      password: values.password,
+    }, false).then((data)=>{
+      if(data){
+        navigate("/");
+      }
+    });
   };
 
   //Snippet that hide or show password

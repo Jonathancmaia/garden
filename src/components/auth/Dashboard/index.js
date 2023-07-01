@@ -10,6 +10,7 @@ import SideBar from "../SideBar";
 import Resume from "../authViews/Resume";
 import Profile from "../authViews/Profile";
 import AddItems from "../authViews/AddItems";
+import AttItems from "../authViews/AttItems";
 import Items from "../authViews/Items";
 import Sales from "../authViews/Sales";
 
@@ -39,7 +40,8 @@ const Dashboard = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="additems" element={<AddItems />} />
             <Route path="items" element={<Items />} />
-            <Route path="Sales" element={<Sales />} />
+            <Route path="sales" element={<Sales />} />
+            <Route path="items/att/:id" element={<AttItems/>}/>
           </Routes>
         </Col>
       </Row>

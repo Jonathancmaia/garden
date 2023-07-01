@@ -1,52 +1,26 @@
 import Context from "../../../../Context";
-import Axios from "axios";
-import Request from "../../../../config/request.js";
 import { useContext } from "react";
-import { Container, Row, Col, Button, Table, Spinner } from "react-bootstrap";
+import { Container, Row, Col, Table, Spinner } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { Trash, Gear } from "react-bootstrap-icons";
+import { Link } from "react-router-dom";
 
 const Items = () => {
-  const { setErrors, errors, setSuccesses, successes } = useContext(Context);
+  const { Request } = useContext(Context);
   const [items, setItems] = useState(false);
 
   //Get all items
   const handleItems = async () => {
-    try {
-      await Axios.get(Request + "/items", {
-        headers: {
-          token: localStorage.getItem("token"),
-        },
-      }).then((response) => {
-        if (response.data.errors) {
-          setErrors([...errors, response.data.errors[0]]);
-        } else if (response.data.successes) {
-          setSuccesses([...successes, response.data.successes[0]]);
-          setItems(response.data.items);
-        }
-      });
-    } catch (e) {
-      setErrors([...errors, { message: e.message }]);
-    }
+    Request("get", "/items", {}, true).then((data)=>{
+      if(data){
+        setItems(data.items);
+      }
+    });
   };
 
   //Delete item
   const deleteItem = async (item) => {
-    try {
-      await Axios.delete(Request + "/items/delete/" + item, {
-        headers: {
-          token: localStorage.getItem("token"),
-        },
-      }).then((response) => {
-        if (response.data.errors) {
-          setErrors([...errors, response.data.errors[0]]);
-        } else if (response.data.successes) {
-          setSuccesses([...successes, response.data.successes[0]]);
-        }
-      });
-    } catch (e) {
-      setErrors([...errors, { message: e.message }]);
-    }
+    Request("delete", "/items/delete/" + item, {}, true);
   };
 
   useEffect(() => {
@@ -79,9 +53,18 @@ const Items = () => {
                     <td>{item.id}</td>
                     <td>{item.name}</td>
                     <td>{item.desc}</td>
-                    <td>{item.value}</td>
+                    <td>{
+                      new Intl.NumberFormat("pt-br", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(
+                        parseInt(item.value) / 100
+                      )}
+                    </td>
                     <td>
-                      <Gear className="icons" />
+                      <Link to={"att/"+item.id}>
+                        <Gear className="icons" />
+                      </Link>
                     </td>
                     <td>
                       <Trash
@@ -96,9 +79,7 @@ const Items = () => {
               </tbody>
             </Table>
           ) : (
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">Carregando...</span>
-            </Spinner>
+            <Spinner animation="border" role="status"/>
           )}
         </Col>
       </Row>

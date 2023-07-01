@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Container, Alert } from "react-bootstrap";
 import { Fire, CheckAll } from "react-bootstrap-icons";
 import { Routes, Route } from "react-router-dom";
@@ -12,12 +12,22 @@ import "./App.css";
 function App() {
   const { errors, successes } = useContext(Context);
 
+  useEffect(() => {
+    for (let i = 0; i < document.getElementsByClassName("alert").length; i++) {
+      document
+        .getElementsByClassName("alert")
+        [i].addEventListener("animationend", () => {
+          document.getElementsByClassName("alert")[i].style.display = "none";
+        });
+    }
+  }, [errors, successes]);
+
   return (
     <Container fluid className="p-0">
       <div className="alert-handler">
         {successes.length > 0 ? (
           successes.map((suc, i) => (
-            <Alert className="col-md-5" variant={"success"} key={i}>
+            <Alert className="col-md-5 alert" variant={"success"} key={i}>
               <Alert.Heading>
                 <CheckAll /> Success!
               </Alert.Heading>
@@ -30,7 +40,12 @@ function App() {
         )}
         {errors.length > 0 ? (
           errors.map((err, i) => (
-            <Alert className="col-md-5" variant={"danger"} key={i} dismissible>
+            <Alert
+              className="col-md-5 alert"
+              variant={"danger"}
+              key={i}
+              dismissible
+            >
               <Alert.Heading>
                 <Fire /> Error!
               </Alert.Heading>

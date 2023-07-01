@@ -19,6 +19,7 @@
 div[role="alert"] {
   position: relative;
   width: 100%;
+  animation: dismiss 5s forwards;
 }
 
 input[type="number"]::-webkit-inner-spin-button {
@@ -45,6 +46,18 @@ input[type="number"]::-webkit-inner-spin-button {
   }
   to {
     width: 100%;
+  }
+}
+
+@keyframes dismiss {
+  0% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
