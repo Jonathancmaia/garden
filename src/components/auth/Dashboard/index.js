@@ -11,6 +11,7 @@ import Resume from "../authViews/Resume";
 import Profile from "../authViews/Profile";
 import AddItems from "../authViews/AddItems";
 import AttItems from "../authViews/AttItems";
+import AttSales from "../authViews/AttSales";
 import Items from "../authViews/Items";
 import Sales from "../authViews/Sales";
 
@@ -42,6 +43,7 @@ const Dashboard = () => {
             <Route path="items" element={<Items />} />
             <Route path="sales" element={<Sales />} />
             <Route path="items/att/:id" element={<AttItems/>}/>
+            <Route path="sales/att/:id" element={<AttSales/>}/>
           </Routes>
         </Col>
       </Row>

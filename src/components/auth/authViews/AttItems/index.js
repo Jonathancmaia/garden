@@ -44,7 +44,7 @@ const AttItems = () => {
     <Container fluid>
       <Row className="pt-4">
         <Col>
-            <h3>Adicionar novo item</h3>
+            <h3>Editar item</h3>
 
             {item ?
                 <Form noValidate onSubmit={handleSubmit(handleAttItem)}>

@@ -27,7 +27,7 @@ function App() {
       <div className="alert-handler">
         {successes.length > 0 ? (
           successes.map((suc, i) => (
-            <Alert className="col-md-5 alert" variant={"success"} key={i}>
+            <Alert className="col-md-5 alert" variant={"success"} key={i} dismissible>
               <Alert.Heading>
                 <CheckAll /> Success!
               </Alert.Heading>

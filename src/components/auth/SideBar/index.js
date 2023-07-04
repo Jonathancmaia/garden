@@ -21,7 +21,7 @@ const SideBar = () => {
                     as={Link}
                     to="/dashboard/addItems"
                   >
-                    Adicionar Itens
+                    Adicionar itens
                   </ListGroup.Item>
                   <ListGroup.Item
                     className="px-0"
@@ -37,8 +37,32 @@ const SideBar = () => {
           </Accordion>
         </ListGroup.Item>
 
-        <ListGroup.Item action className="p-4" as={Link} to="/dashboard/sales">
-          Vendas
+        <ListGroup.Item>
+          <Accordion className="p-1" flush>
+            <Accordion.Item eventKey="1">
+              <Accordion.Header>Vendas</Accordion.Header>
+              <Accordion.Body as="div">
+                <ListGroup variant="flush">
+                  <ListGroup.Item
+                    action
+                    className="px-0"
+                    as={Link}
+                    to="/dashboard/addSales"
+                  >
+                    Adicionar vendas
+                  </ListGroup.Item>
+                  <ListGroup.Item
+                    className="px-0"
+                    action
+                    as={Link}
+                    to="/dashboard/sales"
+                  >
+                    Lista de vendas
+                  </ListGroup.Item>
+                </ListGroup>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
         </ListGroup.Item>
       </ListGroup>
     </div>
