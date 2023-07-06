@@ -2,41 +2,32 @@ import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col, Form, Button, Table, Spinner } from "react-bootstrap";
 import Context from "../../../../Context";
 import { useParams } from "react-router-dom";
-import { Trash } from "react-bootstrap-icons";
+import { Trash, PlusCircle } from "react-bootstrap-icons";
 
 const AttSales = () => {
   const { Request } = useContext(Context);
   const [sale, setSale] = useState(null);
+  const [originalSale, setOriginalSale] = useState(null);
+  const [items, setItems] = useState(null);
   const [total, setTotal] = useState(0);
 
   let { id } = useParams();
 
-  const handleSale = () => {
-    Request("get", "/sales/" + id, {}, true).then((data)=>{
-      if(data){
-        setSale(data.sale);
-      }
-    });
-  };
 
   useEffect(()=>{
-    handleSale();
+    Request("get", "/sales/" + id, {}, true).then((data)=>{
+        if(data){
+          setSale(data.sale);
+          setOriginalSale(data.sale);
+        }
+      }).then(
+          Request("get", "/items", {}, true).then((data)=>{
+              if(data){
+                  setItems(data.items);
+              }
+          })
+      );
   }, []);
-
-  const handleAttSale = async () => {
-    Request("patch", "/sales/att/" + id, {
-      items: sale.items
-    }, true);
-  };
-
-  const deleteItem = (item)=>{
-
-    sale.items.splice(item, 1);
-
-    setSale( prevState => {
-        return {...prevState, items: sale.items}
-    })
-  }
 
   useEffect(()=>{
     if(sale){
@@ -48,94 +39,190 @@ const AttSales = () => {
     }
   },[sale]);
 
+  const handleAttSale = async () => {
+    Request("patch", "/sales/att/" + id, {
+      items: JSON.stringify(sale.items)
+    }, true);
+  };
+
+  const deleteItem = (item)=>{
+
+    const updatedItems = [...sale.items];
+    updatedItems.splice(item, 1);
+
+    setSale((prevState) => {
+        return { ...prevState, items: updatedItems };
+    });
+  }
+
+  const addItem = (item)=>{
+    const updatedItems = [...sale.items];
+    updatedItems.push({
+        name: item.name,
+        value: item.value,
+        id: item.id,
+        qtt: 1,
+    });
+
+    setSale((prevState) => {
+        return { ...prevState, items: updatedItems.sort((a, b) => a.id - b.id) };
+    });
+  }
+
   return (
     <Container fluid>
-      <Row className="pt-4">
+      <Row>
         <Col>
-            <h3>Editar venda</h3>
+        
+            <Row className="pt-4">
+                <Col>
+                <h3>Lista de itens</h3>
+                </Col>
+            </Row>
 
-            <h4>Items</h4>
-            {sale ?
-            <>
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>Id</th>
+            <Row>
+                <Col>
+                    {items ? (
+                        <Table striped bordered hover className="overflow-auto">
+                        <thead>
+                            <tr>
+                            <th>id</th>
                             <th>Nome</th>
-                            <th>Quantidade</th>
+                            <th>Descrição</th>
                             <th>Valor</th>
-                            <th>Remover</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sale.items.map((item, i) => (
-                            <tr key={i}>
-                                <td>
-                                    {item.id}
-                                </td>
-                                <td>
-                                    {item.name}
-                                </td>
-                                <td>
-                                    <Form.Control
-                                        type="number"
-                                        onKeyUp={ (e) => {
-                                            setSale( prevState => {
-                                                const updatedItems = [...prevState.items];
-                                                updatedItems[i] = {
-                                                    ...updatedItems[i],
-                                                    qtt: e.target.value
-                                                };
-
-                                                return {
-                                                    ...prevState,
-                                                    items: updatedItems
-                                                };
-                                            })
-                                        }}
-                                        defaultValue={sale.items[i].qtt}
-                                    />
-                                </td>
-                                <td>
-                                    {new Intl.NumberFormat("pt-br", {
-                                        style: "currency",
-                                        currency: "BRL",
-                                      }).format(
-                                        parseInt(item.value) / 100
-                                      )
-                                    }
-                                </td>
-                                <td>
-                                    <Trash
-                                        className="icons"
-                                        onClick={() => {
-                                            deleteItem(i);
-                                        }}
-                                    />
-                                </td>
+                            <th colSpan={2}>Ações</th>
                             </tr>
-                        ))}
-                        <tr>
-                            <td colSpan={2}>
-                                Total:
-                            </td>
-                            <td colSpan={3}>
-                                {new Intl.NumberFormat("pt-br", {
-                                    style: "currency",
-                                    currency: "BRL",
-                                }).format(
-                                    parseInt(total) / 100
-                                )
-                                }
-                            </td>
-                        </tr>
-                    </tbody>
-                </Table>
+                        </thead>
+                        <tbody>
+                            {items.filter(item => !sale.items.some(saleItem => saleItem.id === item.id)).map((item, i) => (
+                                <tr key={i}>
+                                    <td>{item.id}</td>
+                                    <td>{item.name}</td>
+                                    <td>{item.desc}</td>
+                                    <td>
+                                        {new Intl.NumberFormat("pt-br", {
+                                            style: "currency",
+                                            currency: "BRL",
+                                        }).format(
+                                            parseInt(item.value) / 100
+                                        )}
+                                    </td>
+                                    <td>
+                                        <PlusCircle onClick={()=>{addItem(item)}}/>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                        </Table>
+                    ) : (
+                        <Spinner animation="border" role="status"/>
+                    )}
+                </Col>
+            </Row>
 
-                <Button size="lg">Atualizar venda</Button>
-            </>
-                
-            : <Spinner/>}          
+            <Row>
+                <Col>
+                    {sale ?
+                    <>
+                        <Table striped bordered hover>
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Nome</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor</th>
+                                    <th>Remover</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {sale.items.map((item, i) => (
+                                    <tr key={i}>
+                                        <td>
+                                            {item.id}
+                                        </td>
+                                        <td>
+                                            {item.name}
+                                        </td>
+                                        <td>
+                                            <Form.Control
+                                                type="number"
+                                                onChange={ (e) => {
+                                                    if(e.target.value >= 0 && e.target.value <= 10000){
+                                                        setSale( prevState => {
+                                                            const updatedItems = [...prevState.items];
+                                                            updatedItems[i] = {
+                                                                ...updatedItems[i],
+                                                                qtt: e.target.value
+                                                            };
+
+                                                            return {
+                                                                ...prevState,
+                                                                items: updatedItems
+                                                            };
+                                                        });
+                                                    } else {
+                                                        e.target.value = 1;
+                                                    }
+                                                }}
+
+                                                onBlur={(e)=>{
+                                                    if (e.target.value === ""){
+                                                        e.target.value = 1;
+                                                    }
+                                                }}
+
+                                                value={sale.items[i].qtt}
+                                            />
+                                        </td>
+                                        <td>
+                                            {new Intl.NumberFormat("pt-br", {
+                                                style: "currency",
+                                                currency: "BRL",
+                                            }).format(
+                                                parseInt(item.value) / 100
+                                            )
+                                            }
+                                        </td>
+                                        <td>
+                                            <Trash
+                                                className="icons"
+                                                onClick={() => {
+                                                    deleteItem(i);
+                                                }}
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                                <tr>
+                                    <td colSpan={2}>
+                                        Total:
+                                    </td>
+                                    <td colSpan={3}>
+                                        {new Intl.NumberFormat("pt-br", {
+                                            style: "currency",
+                                            currency: "BRL",
+                                        }).format(
+                                            parseInt(total) / 100
+                                        )
+                                        }
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </Table>
+
+                        <Button
+                            disabled={JSON.stringify(originalSale) === JSON.stringify(sale) || sale.items.length <= 0 ? true : false}
+                            onClick={()=>{handleAttSale()}}
+                            size="lg"
+                        >
+                            Atualizar venda
+                        </Button>
+                    </>
+                        
+                    : <Spinner/>}          
+                </Col>
+            </Row>
+
         </Col>
       </Row>
     </Container>
