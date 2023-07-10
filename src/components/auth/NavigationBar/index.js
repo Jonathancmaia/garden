@@ -34,9 +34,9 @@ const NavigationBar = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
           <Nav>
-            <Nav.Link as={Link} to="/dashboard/profile">
+            {/*<Nav.Link as={Link} to="/dashboard/profile">
               Perfil
-            </Nav.Link>
+            </Nav.Link>*/}
             <Nav.Link
               onClick={() => {
                 logoutHandler();

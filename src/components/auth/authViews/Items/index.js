@@ -10,22 +10,18 @@ const Items = () => {
   const [items, setItems] = useState(false);
 
   //Get all items
-  const handleItems = async () => {
+  useEffect(() => {
     Request("get", "/items", {}, true).then((data)=>{
       if(data){
         setItems(data.items);
       }
     });
-  };
+  }, []);
 
   //Delete item
   const deleteItem = async (item) => {
     Request("delete", "/items/delete/" + item, {}, true);
   };
-
-  useEffect(() => {
-    handleItems();
-  }, []);
 
   return (
     <Container fluid>
